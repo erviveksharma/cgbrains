@@ -53,6 +53,8 @@ def generate_plan(prompt: str, options: dict | None = None) -> QueryPlan:
     if settings.litellm_api_base:
         kwargs["api_base"] = settings.litellm_api_base
 
+    kwargs.update(settings.litellm_extra_kwargs)
+
     plan = client.chat.completions.create(**kwargs)
 
     # Apply option overrides to metadata
