@@ -21,7 +21,14 @@ def _get_qdrant_client() -> QdrantClient:
 
 
 def _fetch_catalog_from_qdrant() -> dict:
-    """Scroll all points from the Qdrant collection and group by category."""
+    """Scroll all points from the Qdrant collection and group by category.
+
+    Each Qdrant point stores service fields under ``payload.metadata`` with a
+    singular ``initiator`` string.  Each point is its own service entry
+    (different points may have different sample_input, description, or even
+    category), so we convert ``initiator`` → ``initiators`` list and group
+    by category.
+    """
     client = _get_qdrant_client()
 
     grouped: dict[str, list[dict]] = defaultdict(list)
@@ -37,9 +44,15 @@ def _fetch_catalog_from_qdrant() -> dict:
         )
 
         for point in results:
-            payload = point.payload
-            category = payload.get("category", "unknown")
-            service = {k: v for k, v in payload.items() if k != "category"}
+            meta = point.payload.get("metadata", point.payload)
+            category = meta.get("category", "unknown")
+            initiator = meta.get("initiator")
+
+            service = {
+                k: v for k, v in meta.items()
+                if k not in ("category", "initiator", "source", "blobType", "loc")
+            }
+            service["initiators"] = [initiator] if initiator else []
             grouped[category].append(service)
 
         if next_offset is None:
