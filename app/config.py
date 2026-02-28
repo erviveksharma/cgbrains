@@ -27,6 +27,11 @@ class Settings(BaseSettings):
     # Database
     database_url: str = "sqlite:///./query_builder.db"
 
+    # Qdrant
+    qdrant_url: str = "https://vector.cyberglobes.ai"
+    qdrant_api_key: str = ""
+    qdrant_collection: str = "cg_data_sources_dev"
+
     # Logging
     log_level: str = "info"
 

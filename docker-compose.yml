@@ -8,6 +8,9 @@ services:
       - OLLAMA_BASE_URL=http://ollama:11434
       - MODEL_NAME=gpt-oss:latest
       - DATABASE_URL=sqlite:///./query_builder.db
+      - QDRANT_URL=${QDRANT_URL:-https://vector.cyberglobes.ai}
+      - QDRANT_API_KEY=${QDRANT_API_KEY}
+      - QDRANT_COLLECTION=${QDRANT_COLLECTION:-cg_data_sources_dev}
     depends_on:
       - ollama
     volumes:
