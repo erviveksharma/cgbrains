@@ -2,6 +2,7 @@ import logging
 import time
 from collections import defaultdict
 
+import httpx
 from qdrant_client import QdrantClient
 
 from app.config import settings
@@ -17,6 +18,9 @@ def _get_qdrant_client() -> QdrantClient:
     return QdrantClient(
         url=settings.qdrant_url,
         api_key=settings.qdrant_api_key or None,
+        timeout=30,
+        # Force IPv6 — server can't reach Cloudflare-proxied hosts via IPv4
+        transport=httpx.HTTPTransport(local_address="::"),
     )
 
 
