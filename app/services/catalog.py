@@ -1,27 +1,34 @@
 import logging
 import time
 from collections import defaultdict
+from typing import Optional
 
 import httpx
-from qdrant_client import QdrantClient
 
 from app.config import settings
 
 logger = logging.getLogger(__name__)
 
-_CATALOG: dict | None = None
+_CATALOG: Optional[dict] = None
 _CATALOG_LOADED_AT: float = 0
 _CACHE_TTL: int = 300  # 5 minutes
 
 
-def _get_qdrant_client() -> QdrantClient:
-    return QdrantClient(
-        url=settings.qdrant_url,
-        api_key=settings.qdrant_api_key or None,
-        timeout=30,
-        # Force IPv6 — server can't reach Cloudflare-proxied hosts via IPv4
-        transport=httpx.HTTPTransport(local_address="::"),
-    )
+def _qdrant_scroll(collection: str, limit: int = 100, offset=None) -> tuple[list, Optional[str]]:
+    """Scroll points from Qdrant using the REST API directly (bypasses qdrant-client IPv4 issues)."""
+    url = f"{settings.qdrant_url}/collections/{collection}/points/scroll"
+    headers = {"Content-Type": "application/json"}
+    if settings.qdrant_api_key:
+        headers["api-key"] = settings.qdrant_api_key
+
+    body = {"limit": limit, "with_payload": True, "with_vector": False}
+    if offset is not None:
+        body["offset"] = offset
+
+    resp = httpx.post(url, json=body, headers=headers, timeout=30)
+    resp.raise_for_status()
+    data = resp.json()["result"]
+    return data["points"], data.get("next_page_offset")
 
 
 def _fetch_catalog_from_qdrant() -> dict:
@@ -30,25 +37,18 @@ def _fetch_catalog_from_qdrant() -> dict:
     Each Qdrant point stores service fields under ``payload.metadata`` with a
     singular ``initiator`` string.  Each point is its own service entry
     (different points may have different sample_input, description, or even
-    category), so we convert ``initiator`` → ``initiators`` list and group
+    category), so we convert ``initiator`` -> ``initiators`` list and group
     by category.
     """
-    client = _get_qdrant_client()
-
     grouped: dict[str, list[dict]] = defaultdict(list)
     offset = None
 
     while True:
-        results, next_offset = client.scroll(
-            collection_name=settings.qdrant_collection,
-            limit=100,
-            offset=offset,
-            with_payload=True,
-            with_vectors=False,
-        )
+        results, next_offset = _qdrant_scroll(settings.qdrant_collection, limit=100, offset=offset)
 
         for point in results:
-            meta = point.payload.get("metadata", point.payload)
+            payload = point.get("payload", {})
+            meta = payload.get("metadata", payload)
             category = meta.get("category", "unknown")
             initiator = meta.get("initiator")
 
@@ -110,7 +110,7 @@ def get_services_summary() -> str:
     return "\n".join(lines)
 
 
-def find_service(category: str, initiator: str | None = None) -> dict | None:
+def find_service(category: str, initiator: Optional[str] = None) -> Optional[dict]:
     """Find a service by category and optional initiator type."""
     catalog = _load_catalog()
 
