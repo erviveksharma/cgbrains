@@ -13,8 +13,6 @@ services:
       - QDRANT_COLLECTION=${QDRANT_COLLECTION:-cg_data_sources_dev}
     depends_on:
       - ollama
-    volumes:
-      - ./app/data:/app/app/data
 
   ollama:
     image: ollama/ollama
