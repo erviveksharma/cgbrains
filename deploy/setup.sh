@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO_URL="https://github.com/cyberglobes/cgbrains.git"
-APP_DIR="/opt/cgbrains"
+APP_DIR="/var/www/cgbrains"
 VENV_DIR="$APP_DIR/venv"
 
 echo "=== cgbrains: one-time server setup ==="

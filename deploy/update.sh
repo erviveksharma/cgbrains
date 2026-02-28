@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_DIR="/opt/cgbrains"
+APP_DIR="/var/www/cgbrains"
 VENV_DIR="$APP_DIR/venv"
 
 echo "=== cgbrains: deploying update ==="

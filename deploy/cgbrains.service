@@ -6,9 +6,9 @@ After=network.target
 Type=simple
 User=www-data
 Group=www-data
-WorkingDirectory=/opt/cgbrains
-EnvironmentFile=/opt/cgbrains/.env
-ExecStart=/opt/cgbrains/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8100 --workers 2
+WorkingDirectory=/var/www/cgbrains
+EnvironmentFile=/var/www/cgbrains/.env
+ExecStart=/var/www/cgbrains/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8100 --workers 2
 Restart=on-failure
 RestartSec=5
 
