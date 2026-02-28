@@ -1,0 +1,6 @@
+{% set topics = step.params.get("narrative_topics", "") %}
+{% if topics %}
+Classify posts into narrative categories: {{ topics }}. Set narrative_ids (comma-separated string).
+{%- else %}
+Classify posts into narrative categories. Set narrative_ids (comma-separated string).
+{%- endif %}

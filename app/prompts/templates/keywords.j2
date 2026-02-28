@@ -1,0 +1,6 @@
+{% set kw = step.params.get("keywords", "") %}
+{% if kw %}
+Match posts against keywords: {{ kw }}. Tag matching posts with attribution_tags (comma-separated string).
+{%- else %}
+Match posts against provided keywords. Tag matching posts with attribution_tags (comma-separated string).
+{%- endif %}

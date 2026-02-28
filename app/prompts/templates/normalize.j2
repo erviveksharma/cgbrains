@@ -1,0 +1,20 @@
+{% set platform = step.params.get("platform", "unknown") %}
+{% if platform == "twitter" %}
+Normalize Twitter data to standard format: map tweet_id→post_id, full_text→content, user.screen_name→author_username, created_at→published_at, favorite_count→likes, retweet_count→shares.
+{%- elif platform == "instagram" %}
+Normalize Instagram data to standard format: map id→post_id, caption→content, owner.username→author_username, taken_at→published_at, like_count→likes, comment_count→comments.
+{%- elif platform == "facebook" %}
+Normalize Facebook data to standard format: map post_id→post_id, message→content, user_name→author_username, time→published_at, likes→likes, shares→shares.
+{%- elif platform == "tiktok" %}
+Normalize TikTok data to standard format: map id→post_id, desc→content, author.uniqueId→author_username, createTime→published_at, diggCount→likes, shareCount→shares.
+{%- elif platform == "youtube" %}
+Normalize YouTube data to standard format: map videoId→post_id, title+description→content, channelTitle→author_username, publishedAt→published_at, likeCount→likes, commentCount→comments.
+{%- elif platform == "telegram" %}
+Normalize Telegram data to standard format: map id→post_id, message→content, from.username→author_username, date→published_at, views→views, forwards→shares.
+{%- elif platform == "reddit" %}
+Normalize Reddit data to standard format: map id→post_id, title+selftext→content, author→author_username, created_utc→published_at, ups→likes, num_comments→comments.
+{%- elif platform == "linkedin" %}
+Normalize LinkedIn data to standard format: map urn→post_id, commentary→content, author.name→author_username, publishedAt→published_at, likeCount→likes, commentCount→comments.
+{%- else %}
+Normalize {{ platform }} data to standard format.
+{%- endif %}
